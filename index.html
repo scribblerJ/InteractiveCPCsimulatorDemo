@@ -1,0 +1,4238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzAd 잘고른리뷰 시뮬레이터</title>
+    <style>
+
+:root {
+  --border-color: #333;
+  --bg-gray: #eee;
+  --success: #4caf50;
+  --fail: #f44336;
+  --loading: #2196f3;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f5f6fa;
+            color: var(--border-color);
+            overflow-x: hidden;
+        }
+
+        /* ===========================================
+           전체 레이아웃
+        =========================================== */
+        .main-layout {
+            display: flex;
+            min-height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ===========================================
+           좌측 편집 패널
+        =========================================== */
+        .editor-panel {
+            width: 50%;
+            min-width: 400px;
+            background: #ffffff;
+            border-right: 1px solid #e1e5e9;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .editor-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid #e1e5e9;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--border-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 1px solid;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .btn-secondary {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .btn-secondary:hover {
+            background: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .btn-outline {
+            background: #f8f9fa;
+            color: #666;
+            border-color: #ddd;
+        }
+
+        .btn-outline:hover {
+            background: #e9ecef;
+            color: var(--border-color);
+        }
+
+        .editor-content {
+            padding: 2rem;
+        }
+
+        /* ===========================================
+           사용 가이드 카드 디자인 
+        =========================================== */
+        .workflow-card {
+            background: #fef7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: #9a3412;
+            position: relative;
+        }
+
+        .workflow-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #9a3412;
+        }
+
+        .workflow-content {
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .workflow-step {
+            margin-bottom: 0.5rem;
+            color: #9a3412;
+        }
+
+        .workflow-step:last-of-type {
+            margin-bottom: 1rem;
+        }
+
+        .workflow-step strong {
+            color: #9a3412;
+            font-weight: 600;
+        }
+
+        .workflow-note {
+            background: transparent;
+            border: none;
+            font-size: 0.875rem;
+            text-align: left;
+            margin-top: 0.5rem;
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        /* ===========================================
+           브랜드 입력 섹션
+        =========================================== */
+        .brand-input-section {
+            margin-bottom: 2rem;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .tooltip-trigger {
+            cursor: help;
+            opacity: 0.7;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        /* ===========================================
+           제품 섹션
+        =========================================== */
+        .product-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .product-table-container {
+            border: 1px solid #e1e5e9;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: white;
+            margin-bottom: 1rem;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--border-color);
+            font-size: 0.875rem;
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 2px solid #e1e5e9;
+            border-right: 1px solid #e1e5e9;
+        }
+
+        .product-table th:last-child {
+            border-right: none;
+        }
+
+        .product-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e1e5e9;
+            border-right: 1px solid #e1e5e9;
+            min-height: 50px;
+            vertical-align: top;
+            position: relative;
+        }
+
+        .product-table td:last-child {
+            border-right: none;
+        }
+
+        .product-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 편집 가능한 셀 */
+        .editable-cell {
+            cursor: text;
+            transition: all 0.2s;
+            min-height: 50px;
+            outline: none;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .editable-cell:hover {
+            background: #f8f9fa;
+        }
+
+        .editable-cell:focus {
+            background: white;
+            border: 2px solid #4285f4;
+            padding: calc(0.75rem - 1px);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        .editable-cell.active {
+            background: #e3f2fd;
+            border: 2px solid #4285f4;
+            padding: calc(0.75rem - 1px);
+        }
+
+        .editable-cell.empty {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .editable-cell.empty:focus {
+            color: var(--border-color);
+            font-style: normal;
+        }
+
+        /* 고민 셀 스타일 */
+        .concern-cell {
+            background: #f0f7ff;
+            color: #1976d2;
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .concern-cell:hover {
+            background: #e3f2fd;
+        }
+
+        .concern-cell:focus {
+            background: white;
+            color: var(--border-color);
+        }
+
+        .concern-cell.active {
+            background: #e3f2fd;
+        }
+
+        /* URL 셀 */
+        .url-cell {
+            max-width: 200px;
+            word-break: break-all;
+            font-size: 0.75rem;
+        }
+
+        /* ===========================================
+           우측 시뮬레이터 패널
+        =========================================== */
+        .simulator-panel {
+            width: 50%;
+            min-width: 400px;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            right: 0;
+            top: 0;
+        }
+
+        .phone-frame {
+            width: 320px;
+            height: 640px;
+            background: var(--border-color);
+            border-radius: 2rem;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .simulator-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* 화면 전환 */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 메인 화면 */
+        .main-screen {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 4rem 1rem 2rem;
+            overflow: hidden;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--border-color)333;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.25rem;
+        }
+
+        .option-button {
+            border-radius: 0.5rem;
+            background: #ffffff;
+            width: 5.5rem;
+            height: 5.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            appearance: none;
+            font-family: inherit;
+        }
+
+        .option-button:active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .option-text {
+            font-weight: 500;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            color: var(--border-color)333;
+            transition: all 0.2s ease;
+            white-space: pre-line;
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .option-button:active .option-text {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 로딩 화면 */
+        .loading-screen {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 4rem 1rem 2rem;
+            overflow: hidden;
+        }
+
+        .loading-title {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--border-color)333;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 50%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .loading-spinner-container {
+            width: 80%;
+            height: 80%;
+            transform: translateY(-0.25rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid var(--border-color)333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            position: absolute;
+            bottom: -1.5rem;
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: rgba(51, 51, 51, 0.7);
+            transition: opacity 0.3s ease-in-out;
+            opacity: 1;
+        }
+
+        /* 상품 상세 화면 */
+        .product-screen {
+            background: #ffffff;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            justify-content: flex-start;
+            position: relative;
+            min-height: 100%;
+        }
+
+        .back-button {
+            border-radius: 50%;
+            padding: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            align-self: flex-start;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .back-button svg {
+            width: 1rem;
+            height: 1rem;
+            stroke: var(--border-color)333;
+            stroke-width: 2;
+        }
+
+        .review-container {
+            position: relative;
+            padding: 1rem;
+            padding-top: 1.5rem;
+            border-radius: 0.5rem;
+            background: #f8f9fa;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .review-icon {
+            position: absolute;
+            top: -0.75rem;
+            left: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .review-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .review-text {
+            white-space: pre-line;
+            color: rgba(51, 51, 51, 0.8);
+            font-size: 0.6rem;
+            line-height: 1.4;
+            font-weight: normal;
+            text-align: left;
+            width: 100%;
+        }
+
+        .rating {
+            font-weight: 600;
+            white-space: pre-line;
+            font-size: 0.55rem;
+            color: #D81E1F;
+            align-self: center;
+        }
+
+        .product-highlight {
+            color: var(--border-color)333;
+            font-size: 0.6rem;
+            font-weight: 600;
+            white-space: pre-line;
+            text-align: center;
+        }
+
+        .spacer {
+            opacity: 0.2;
+            height: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0.75rem 0;
+        }
+
+        .spacer-element {
+            width: 2rem;
+            height: 1rem;
+            background: #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .product-image {
+            position: relative;
+            width: 6rem;
+            height: 6rem;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            color: #6b7280;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            width: 100%;
+            height: 100%;
+        }
+
+        .product-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .product-name {
+            color: var(--border-color)333;
+            font-size: 0.65rem;
+            white-space: pre-line;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.3;
+            max-width: 200px;
+        }
+
+        .cta-button {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 0.75rem;
+            background: #D2302F;
+            color: white;
+            font-weight: 600;
+            font-size: 0.7rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            overflow: hidden;
+            border: none;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        .cta-button:active {
+            padding-top: 0.875rem;
+            padding-bottom: 0.625rem;
+        }
+
+        .cta-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .cta-button:active .cta-overlay {
+            opacity: 1;
+        }
+
+        .cta-text {
+            position: relative;
+            z-index: 10;
+            color: white;
+        }
+
+        /* AI 자동생성 안내 알림 (모바일 화면 상단) */
+        .ai-info-notice {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            background: rgba(255, 85, 85, 0.95);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(255, 85, 85, 0.3);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .ai-info-notice.show {
+            top: -80px;
+            opacity: 1;
+        }
+
+        .ai-info-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .ai-info-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .ai-info-text {
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+
+        /* 좁은 화면에서 세로 배치 */
+        @media (max-width: 900px) {
+            .editor-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .header-content-section {
+                order: 1;
+            }
+            
+            .header-buttons-section {
+                order: 2;
+                justify-content: center;
+            }
+        }
+
+        /* ===========================================
+           업데이트 알림
+        =========================================== */
+        .update-notice {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FF5555;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-1rem);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(255, 85, 85, 0.3);
+        }
+
+        .update-notice.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===========================================
+           반응형
+        =========================================== */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+                max-height: none;
+                overflow: visible;
+            }
+            
+            .editor-panel {
+                width: 100%;
+                min-width: auto;
+                height: auto;
+                position: relative;
+            }
+            
+            .simulator-panel {
+                width: 100%;
+                min-width: auto;
+                height: 60vh;
+                position: relative;
+                right: auto;
+                top: auto;
+            }
+            
+            .phone-frame {
+                width: 240px;
+                height: 480px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .main-layout {
+                flex-direction: row !important;
+            }
+            
+            .editor-panel {
+                width: 50% !important;
+                height: 100vh !important;
+            }
+            
+            .simulator-panel {
+                width: 50% !important;
+                height: 100vh !important;
+                position: fixed !important;
+                right: 0 !important;
+                top: 0 !important;
+            }
+        }
+    </style>
+<style id="legacy-capture-css">
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f5f6fa;
+            color: var(--border-color);
+            overflow-x: hidden;
+        }
+
+        /* 전체 레이아웃 */
+        .main-layout {
+            display: flex;
+            min-height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 좌측 편집 패널 */
+        .editor-panel {
+            width: 50%;
+            min-width: 400px;
+            background: #ffffff;
+            border-right: 1px solid #e1e5e9;
+            overflow-y: auto;
+            padding: 2rem;
+            height: 100vh;
+        }
+
+        .editor-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .editor-header-content {
+            flex: 1;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .download-button {
+            background: #10b981;
+            color: white;
+            border: 1px solid #10b981;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .download-button:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .screenshot-button {
+            background: #6366f1;
+            color: white;
+            border: 1px solid #6366f1;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .screenshot-button:hover {
+            background: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .editor-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--border-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .editor-subtitle {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .reset-button {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .reset-button:hover {
+            background: #e9ecef;
+            color: var(--border-color);
+        }
+
+        /* 폼 섹션 */
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-icon {
+            font-size: 1.25rem;
+        }
+
+        /* 제품 탭 */
+        .product-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 1rem 0;
+            z-index: 10;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .product-tab {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 1.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #666;
+            font-weight: 500;
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+        }
+
+        .product-tab:hover {
+            background: #e9ecef;
+            border-color: #bbb;
+        }
+
+        .product-tab.active {
+            background: #4285f4;
+            color: white;
+            border-color: #4285f4;
+        }
+
+        /* 공통 폼 */
+        .product-divider {
+            margin: 1.5rem 0;
+            padding: 0.75rem;
+            background: linear-gradient(90deg, #f0f7ff 0%, #e3f2fd 100%);
+            border-left: 4px solid #4285f4;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #1976d2;
+            font-weight: 500;
+        }
+
+        /* 폼 요소 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-textarea.large {
+            min-height: 120px;
+        }
+
+        .concern-textarea {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            resize: vertical;
+            min-height: 50px;
+            line-height: 1.3;
+        }
+
+        /* 우측 시뮬레이터 */
+        .simulator-panel {
+            width: 50%;
+            min-width: 400px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            right: 0;
+            top: 0;
+        }
+
+        .phone-frame {
+            width: 320px;
+            height: 640px;
+            background: var(--border-color);
+            border-radius: 2rem;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .simulator-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* 화면 전환 */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 메인 화면 */
+        .main-screen {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 4rem 1rem 2rem;
+            overflow: hidden;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--border-color)333;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.25rem;
+        }
+
+        .option-button {
+            border-radius: 0.5rem;
+            background: #ffffff;
+            width: 5.5rem;
+            height: 5.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            appearance: none;
+            font-family: inherit;
+        }
+
+        .option-button:active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .option-text {
+            font-weight: 500;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            color: var(--border-color)333;
+            transition: all 0.2s ease;
+            white-space: pre-line;
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .option-button:active .option-text {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 로딩 화면 */
+        .loading-screen {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 4rem 1rem 2rem;
+            overflow: hidden;
+        }
+
+        .loading-title {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--border-color)333;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 50%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .loading-spinner-container {
+            width: 80%;
+            height: 80%;
+            transform: translateY(-0.25rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid var(--border-color)333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            position: absolute;
+            bottom: -1.5rem;
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: rgba(51, 51, 51, 0.7);
+            transition: opacity 0.3s ease-in-out;
+            opacity: 1;
+        }
+
+        /* 상품 상세 화면 */
+        .product-screen {
+            background: #ffffff;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            justify-content: flex-start;
+            position: relative;
+            min-height: 100%;
+        }
+
+        .back-button {
+            border-radius: 50%;
+            padding: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            align-self: flex-start;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .back-button svg {
+            width: 1rem;
+            height: 1rem;
+            stroke: var(--border-color)333;
+            stroke-width: 2;
+        }
+
+        .review-container {
+            position: relative;
+            padding: 1rem;
+            padding-top: 1.5rem;
+            border-radius: 0.5rem;
+            background: #f8f9fa;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .review-icon {
+            position: absolute;
+            top: -0.75rem;
+            left: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .review-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .review-text {
+            white-space: pre-line;
+            color: rgba(51, 51, 51, 0.8);
+            font-size: 0.6rem;
+            line-height: 1.4;
+            font-weight: normal;
+            text-align: left;
+            width: 100%;
+        }
+
+        .rating {
+            font-weight: 600;
+            white-space: pre-line;
+            font-size: 0.55rem;
+            color: #D81E1F;
+            align-self: center;
+        }
+
+        .product-highlight {
+            color: var(--border-color)333;
+            font-size: 0.6rem;
+            font-weight: 600;
+            white-space: pre-line;
+            text-align: center;
+        }
+
+        .spacer {
+            opacity: 0.2;
+            height: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0.75rem 0;
+        }
+
+        .spacer-element {
+            width: 2rem;
+            height: 1rem;
+            background: #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .product-image {
+            position: relative;
+            width: 6rem;
+            height: 6rem;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            color: #6b7280;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            width: 100%;
+            height: 100%;
+        }
+
+        .product-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .product-name {
+            color: var(--border-color)333;
+            font-size: 0.65rem;
+            white-space: pre-line;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.3;
+            max-width: 200px;
+        }
+
+        .cta-button {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 0.75rem;
+            background: #D2302F;
+            color: white;
+            font-weight: 600;
+            font-size: 0.7rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            overflow: hidden;
+            border: none;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        .cta-button:active {
+            padding-top: 0.875rem;
+            padding-bottom: 0.625rem;
+        }
+
+        .cta-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .cta-button:active .cta-overlay {
+            opacity: 1;
+        }
+
+        .cta-text {
+            position: relative;
+            z-index: 10;
+            color: white;
+        }
+
+        /* 업데이트 알림 */
+        .update-notice {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-1rem);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .update-notice.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 캡처 모달 스타일 */
+        .capture-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .capture-modal.hidden {
+            display: none;
+        }
+
+        .capture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .capture-content {
+            position: relative;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .capture-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .capture-header h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--border-color);
+            margin: 0;
+        }
+
+        .capture-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .capture-close:hover {
+            color: var(--border-color);
+        }
+
+        .capture-progress {
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .capture-previews {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preview-title {
+            font-weight: 600;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .preview-frame {
+            width: 160px;
+            height: 320px;
+            border: 2px solid #e5e7eb;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+
+        .preview-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .preview-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .preview-status.processing {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .preview-status.completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .capture-actions {
+            text-align: center;
+        }
+
+        .capture-button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .capture-button:hover {
+            background: #3367d6;
+        }
+
+        .capture-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .capture-content {
+                margin: 1rem;
+                padding: 1.5rem;
+                max-width: none;
+            }
+            
+            .capture-previews {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+                max-height: none;
+                overflow: visible;
+            }
+            
+            .editor-panel {
+                width: 100%;
+                min-width: auto;
+                height: auto;
+                position: relative;
+            }
+            
+            .simulator-panel {
+                width: 100%;
+                min-width: auto;
+                height: 60vh;
+                position: relative;
+                right: auto;
+                top: auto;
+            }
+            
+            .phone-frame {
+                width: 240px;
+                height: 480px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .main-layout {
+                flex-direction: row !important;
+            }
+            
+            .editor-panel {
+                width: 50% !important;
+                height: 100vh !important;
+            }
+            
+            .simulator-panel {
+                width: 50% !important;
+                height: 100vh !important;
+                position: fixed !important;
+                right: 0 !important;
+                top: 0 !important;
+            }
+        }
+    
+</style>
+</head>
+<body>
+    <div class="main-layout">
+        <!-- ========================================
+             좌측 편집 패널
+        ======================================== -->
+        <div class="editor-panel">
+            <!-- 헤더 영역 -->
+            <div class="editor-header">
+                <!-- 제목 영역 (좌측 정렬) -->
+                <div class="header-content-section">
+                    <div class="header-content">
+                        <h1 class="header-title">🎯 잘고른 리뷰 시뮬레이터</h1>
+                        <p class="header-subtitle">실시간으로 광고 동작을 확인하고 콘텐츠를 편집해보세요</p>
+                    </div>
+                </div>
+                
+                <!-- 버튼 영역 (우측 정렬) -->
+                <div class="header-buttons-section">
+                    <div class="header-buttons">
+                        <button class="btn btn-primary" onclick="App.exportData()" title="고민별 제품 데이터를 CSV로 다운로드">
+                            📊 CSV 다운로드
+                        </button>
+                        <button class="btn btn-secondary" onclick="App.captureScreens()" title="화면 GUI를 PNG로 다운로드">
+                            📸 화면 캡처
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 콘텐츠 영역 -->
+            <div class="editor-content">
+                <!-- 개선된 사용 가이드 카드 -->
+                <div class="workflow-card">
+                    <div class="workflow-title">📋 사용 가이드</div>
+                    <div class="workflow-content">
+                        <div class="workflow-step">
+                            <strong>1단계:</strong> 브랜드명과 제품 정보를 입력하여 광고 시뮬레이션을 확인해주세요
+                        </div>
+                        <div class="workflow-step">
+                            <strong>2단계:</strong> 만족스러운 설정이 완료되면 'CSV 다운로드' 버튼을 클릭해주세요
+                        </div>
+                        <div class="workflow-step">
+                            <strong>3단계:</strong> 다운로드된 CSV 파일을 버즈빌 세일즈 매니저에게 이메일로 전달해주세요
+                        </div>
+                        <div class="workflow-note">
+                            ※ CSV 파일이 실제 광고 운영 기준이 됩니다
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 브랜드명 설정 -->
+                <div class="brand-input-section">
+                    <label class="input-label" for="brandInput">
+                        브랜드명
+                        <span class="tooltip-trigger" title="모든 제품에 공통으로 적용됩니다">💡</span>
+                    </label>
+                    <input type="text" class="form-input" id="brandInput" placeholder="예: 닥터지" value="닥터지">
+                </div>
+
+                <!-- 제품 목록 편집 -->
+                <div class="product-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            제품 목록
+                            <span class="tooltip-trigger" title="각 셀을 클릭해서 제품 정보를 수정하세요">💡</span>
+                        </h3>
+                    </div>
+
+                    <!-- 제품 편집 테이블 -->
+                    <div class="product-table-container">
+                        <table class="product-table" id="productTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%;">제품명</th>
+                                    <th style="width: 25%;">소구점</th>
+                                    <th style="width: 15%;">고민 키워드</th>
+                                    <th style="width: 25%;">이미지URL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody">
+                                <!-- 동적으로 생성되는 데이터 행들 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             우측 시뮬레이터 패널
+        ======================================== -->
+        <div class="simulator-panel">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="simulator-container">
+                        
+                        <!-- 첫 번째 화면: 선택 옵션 -->
+                        <div id="mainScreen" class="screen main-screen">
+                            <div class="title">지금 내 피부고민을 선택하고 
+용돈을 받아보세요!</div>
+                            
+                            <div class="options-grid" id="optionsGrid">
+                                <!-- 동적으로 생성됨 -->
+                            </div>
+                        </div>
+
+                        <!-- 두 번째 화면: 로딩 -->
+                        <div id="loadingScreen" class="screen loading-screen hidden">
+                            <div class="loading-title">AI가 당신에게 맞는
+제품을 찾고 있어요...</div>
+                            
+                            <div class="loading-container">
+                                <div class="loading-spinner-container">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                                <span class="loading-text">추천 정리 중...</span>
+                            </div>
+                        </div>
+
+                        <!-- 세 번째 화면: 상품 상세 -->
+                        <div id="productScreen" class="screen product-screen hidden">
+                            <button class="back-button" onclick="App.goBack()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                    <path d="M20 26L10 16L20 6" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </button>
+
+                            <div class="review-container">
+                                <div class="review-icon">💭</div>
+                                <div class="review-content">
+                                    <p class="review-text" id="reviewText"></p>
+                                    <p class="rating" id="ratingText"></p>
+                                    <p class="product-highlight" id="highlightText"></p>
+                                </div>
+                            </div>
+
+                            <div class="spacer">
+                                <div class="spacer-element"></div>
+                            </div>
+
+                            <div class="product-info">
+                                <div class="product-image" id="productImage">
+                                    <div class="product-placeholder">
+                                        <div class="product-icon">🧴</div>
+                                        <div style="font-size: 0.5rem; color: #9ca3af;">브랜드</div>
+                                    </div>
+                                </div>
+                                <p class="product-name" id="productNameText"></p>
+                            </div>
+
+                            <button class="cta-button" onclick="App.handleCTA()">
+                                <div class="cta-overlay"></div>
+                                <p class="cta-text" id="ctaButtonText"></p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI 자동생성 안내 알림 (모바일 화면 밖) -->
+                <div class="ai-info-notice" id="aiInfoNotice">
+                    <div class="ai-info-content">
+                        <div class="ai-info-icon">🤖</div>
+                        <div class="ai-info-text">
+                            <strong>AI 자동생성 정보</strong><br>
+                            리뷰 내용과 별점 정보는 AI가 자동으로 수집·생성하여 광고에 적용됩니다
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 업데이트 알림 -->
+    <div class="update-notice" id="updateNotice">
+        ⚡ 실시간 업데이트됨
+    </div>
+
+    <script>
+const get = id => document.getElementById(id);
+        // 샘플 데이터 정의
+        const SAMPLE_DATA = {
+            concerns: ["넓은 모공", "눈가·팔자 등\n깊은 주름", "메이크업 시\n들뜨는 피부결", "피부 탄력"],
+            review: "정말 효과가 좋아요! 꾸준히 사용하니까 확실히 달라진 느낌입니다. 처음에는 반신반의했는데 2주 정도 쓰고 나서부터 변화가 느껴지기 시작했어요. 지금은 3개월째 사용하고 있는데 주변에서도 좋아졌다는 말을 많이 들어요. 가격이 부담스럽긴 하지만 그만한 가치가 있다고 생각해요.",
+            rating: "4.8/5 제품평(1,234건)"
+        };
+
+        // 전역 애플리케이션 상태 관리
+        const AppState = {
+            config: {
+                commonBrand: "닥터지",
+                ctaText: "제품 구경하고 용돈 받기",
+                productCount: 4
+            },
+            products: {
+                1: {
+                    concern: SAMPLE_DATA.concerns[0],
+                    productTitle: "레드 블레미쉬 클리어 수딩 크림 70ml",
+                    productHighlight: "모공 케어 & 진정 전문!",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0020/A00000020679402ko.jpg",
+                    productReview: SAMPLE_DATA.review,
+                    rating: SAMPLE_DATA.rating
+                },
+                2: {
+                    concern: SAMPLE_DATA.concerns[1],
+                    productTitle: "어드밴스드 나이트 리페어 세럼 50ml",
+                    productHighlight: "안티에이징 & 주름 개선!",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0019/A00000019800101ko.jpg",
+                    productReview: SAMPLE_DATA.review,
+                    rating: SAMPLE_DATA.rating
+                },
+                3: {
+                    concern: SAMPLE_DATA.concerns[2],
+                    productTitle: "네오 파운데이션 30ml",
+                    productHighlight: "매끄러운 피부 표현!",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0018/A00000018965101ko.jpg",
+                    productReview: SAMPLE_DATA.review,
+                    rating: SAMPLE_DATA.rating
+                },
+                4: {
+                    concern: SAMPLE_DATA.concerns[3],
+                    productTitle: "페이셜 트리트먼트 에센스 230ml",
+                    productHighlight: "프리미엄 탄력 케어!",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0015/A00000015234101ko.jpg",
+                    productReview: SAMPLE_DATA.review,
+                    rating: SAMPLE_DATA.rating
+                }
+            },
+            currentProduct: 1,
+            currentScreen: 'main'
+        };
+
+        // 커서 위치 관리 유틸리티
+        const CursorUtils = {
+            // 커서를 텍스트 끝으로 이동
+            setCursorToEnd: function(element) {
+                element.focus();
+                if (window.getSelection && document.createRange) {
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    
+                    // 텍스트 노드가 있는 경우 끝으로 이동
+                    if (element.childNodes.length > 0) {
+                        const lastNode = element.childNodes[element.childNodes.length - 1];
+                        if (lastNode.nodeType === Node.TEXT_NODE) {
+                            range.setStart(lastNode, lastNode.textContent.length);
+                        } else {
+                            range.setStartAfter(lastNode);
+                        }
+                    } else {
+                        range.setStart(element, 0);
+                    }
+                    
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            },
+
+            // 전체 텍스트 선택
+            selectAll: function(element) {
+                element.focus();
+                if (window.getSelection && document.createRange) {
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    range.selectNodeContents(element);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+        };
+
+        // 테이블 관리 모듈
+        const TableManager = {
+            currentEditingCell: null,
+            
+            createTable: function() {
+                const tbody = get('productTableBody');
+                tbody.innerHTML = '';
+                
+                for (let i = 1; i <= AppState.config.productCount; i++) {
+                    const product = AppState.products[i];
+                    const row = document.createElement('tr');
+                    
+                    // 제품명 셀 (1번째)
+                    const titleCell = document.createElement('td');
+                    titleCell.className = 'editable-cell' + (i === AppState.currentProduct ? ' active' : '');
+                    titleCell.contentEditable = 'true';
+                    titleCell.dataset.field = 'productTitle';
+                    titleCell.dataset.product = i;
+                    titleCell.textContent = product.productTitle || '제품명을 입력하세요';
+                    if (!product.productTitle) {
+                        titleCell.classList.add('empty');
+                    }
+                    
+                    // 소구점 셀 (2번째) 
+                    const highlightCell = document.createElement('td');
+                    highlightCell.className = 'editable-cell' + (i === AppState.currentProduct ? ' active' : '');
+                    highlightCell.contentEditable = 'true';
+                    highlightCell.dataset.field = 'productHighlight';
+                    highlightCell.dataset.product = i;
+                    highlightCell.textContent = product.productHighlight || '소구점을 입력하세요';
+                    if (!product.productHighlight) {
+                        highlightCell.classList.add('empty');
+                    }
+                    
+                    // 고민 키워드 셀 (3번째)
+                    const concernCell = document.createElement('td');
+                    concernCell.className = 'editable-cell concern-cell' + (i === AppState.currentProduct ? ' active' : '');
+                    concernCell.contentEditable = 'true';
+                    concernCell.dataset.field = 'concern';
+                    concernCell.dataset.product = i;
+                    concernCell.textContent = product.concern || '고민 키워드 입력';
+                    if (!product.concern) {
+                        concernCell.classList.add('empty');
+                    }
+                    
+                    // 이미지URL 셀 (4번째)
+                    const urlCell = document.createElement('td');
+                    urlCell.className = 'editable-cell url-cell' + (i === AppState.currentProduct ? ' active' : '');
+                    urlCell.contentEditable = 'true';
+                    urlCell.dataset.field = 'imageUrl';
+                    urlCell.dataset.product = i;
+                    urlCell.textContent = product.imageUrl || 'URL을 입력하세요';
+                    if (!product.imageUrl) {
+                        urlCell.classList.add('empty');
+                    }
+                    
+                    row.appendChild(titleCell);
+                    row.appendChild(highlightCell);
+                    row.appendChild(concernCell);
+                    row.appendChild(urlCell);
+                    tbody.appendChild(row);
+                }
+                
+                this.attachEventListeners();
+            },
+            
+            attachEventListeners: function() {
+                const editableCells = document.querySelectorAll('.editable-cell');
+                
+                editableCells.forEach(cell => {
+                    // 클릭 이벤트
+                    cell.addEventListener('click', (e) => {
+                        this.handleCellClick(e.target);
+                    });
+                    
+                    // 포커스 이벤트
+                    cell.addEventListener('focus', (e) => {
+                        this.handleCellFocus(e.target);
+                    });
+                    
+                    // 블러 이벤트 (포커스 잃을 때)
+                    cell.addEventListener('blur', (e) => {
+                        this.handleCellBlur(e.target);
+                    });
+                    
+                    // 키다운 이벤트
+                    cell.addEventListener('keydown', (e) => {
+                        this.handleKeyDown(e, e.target);
+                    });
+                    
+                    // 입력 이벤트
+                    cell.addEventListener('input', (e) => {
+                        this.handleCellInput(e.target);
+                    });
+                });
+            },
+            
+            handleCellClick: function(cell) {
+                const productNum = parseInt(cell.dataset.product);
+                this.switchToProduct(productNum);
+                
+                // 빈 셀인 경우 플레이스홀더 텍스트 제거
+                if (cell.classList.contains('empty')) {
+                    cell.textContent = '';
+                    cell.classList.remove('empty');
+                }
+                
+                // 약간의 지연 후 커서를 끝으로 이동
+                setTimeout(() => {
+                    CursorUtils.setCursorToEnd(cell);
+                }, 10);
+            },
+            
+            handleCellFocus: function(cell) {
+                this.currentEditingCell = cell;
+                
+                // 빈 셀인 경우 플레이스홀더 텍스트 제거
+                if (cell.classList.contains('empty')) {
+                    cell.textContent = '';
+                    cell.classList.remove('empty');
+                }
+            },
+            
+            handleCellBlur: function(cell) {
+                this.saveCell(cell);
+                this.currentEditingCell = null;
+            },
+            
+            handleKeyDown: function(e, cell) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    cell.blur(); // 저장하고 편집 종료
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.cancelEdit(cell);
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    this.moveToNextCell(cell, e.shiftKey);
+                } else if (e.ctrlKey && e.key === 'a') {
+                    e.preventDefault();
+                    CursorUtils.selectAll(cell);
+                }
+            },
+            
+            handleCellInput: function(cell) {
+                // 실시간으로 데이터 업데이트하지 않고 blur 시점에만 저장
+                // 하지만 빈 상태 체크는 실시간으로
+                if (cell.textContent.trim() === '') {
+                    if (!cell.classList.contains('empty')) {
+                        cell.classList.add('empty');
+                    }
+                } else {
+                    if (cell.classList.contains('empty')) {
+                        cell.classList.remove('empty');
+                    }
+                }
+            },
+            
+            saveCell: function(cell) {
+                const field = cell.dataset.field;
+                const productNum = parseInt(cell.dataset.product);
+                const value = cell.textContent.trim();
+                
+                // 빈 값인 경우 플레이스홀더 텍스트 복원
+                if (!value) {
+                    const placeholders = {
+                        productTitle: '제품명을 입력하세요',
+                        productHighlight: '소구점을 입력하세요',
+                        concern: '고민 키워드 입력',
+                        imageUrl: 'URL을 입력하세요'
+                    };
+                    cell.textContent = placeholders[field];
+                    cell.classList.add('empty');
+                    AppState.products[productNum][field] = '';
+                } else {
+                    AppState.products[productNum][field] = value;
+                    cell.classList.remove('empty');
+                }
+                
+                // 현재 제품인 경우 시뮬레이터 업데이트
+                if (productNum === AppState.currentProduct) {
+                    SimulatorController.update.options();
+                    if (AppState.currentScreen === 'product') {
+                        SimulatorController.update.productDetail(productNum);
+                    }
+                } else {
+                    SimulatorController.update.options();
+                }
+                
+                Utils.showNotice();
+            },
+            
+            cancelEdit: function(cell) {
+                const field = cell.dataset.field;
+                const productNum = parseInt(cell.dataset.product);
+                const originalValue = AppState.products[productNum][field];
+                
+                if (originalValue) {
+                    cell.textContent = originalValue;
+                    cell.classList.remove('empty');
+                } else {
+                    const placeholders = {
+                        productTitle: '제품명을 입력하세요',
+                        productHighlight: '소구점을 입력하세요',
+                        concern: '고민 키워드 입력',
+                        imageUrl: 'URL을 입력하세요'
+                    };
+                    cell.textContent = placeholders[field];
+                    cell.classList.add('empty');
+                }
+                
+                cell.blur();
+            },
+            
+            moveToNextCell: function(currentCell, reverse = false) {
+                const allCells = Array.from(document.querySelectorAll('.editable-cell'));
+                const currentIndex = allCells.indexOf(currentCell);
+                
+                let nextIndex;
+                if (reverse) {
+                    nextIndex = currentIndex > 0 ? currentIndex - 1 : allCells.length - 1;
+                } else {
+                    nextIndex = currentIndex < allCells.length - 1 ? currentIndex + 1 : 0;
+                }
+                
+                const nextCell = allCells[nextIndex];
+                if (nextCell) {
+                    currentCell.blur();
+                    nextCell.focus();
+                }
+            },
+            
+            switchToProduct: function(productNum) {
+                AppState.currentProduct = productNum;
+                
+                // 모든 셀의 active 스타일 제거
+                document.querySelectorAll('.editable-cell').forEach(cell => {
+                    cell.classList.remove('active');
+                });
+                
+                // 선택된 제품의 셀들에 active 클래스 추가
+                document.querySelectorAll(`[data-product="${productNum}"]`).forEach(cell => {
+                    cell.classList.add('active');
+                });
+                
+                // 시뮬레이터 업데이트
+                SimulatorController.update.options();
+                if (AppState.currentScreen === 'product') {
+                    SimulatorController.update.productDetail(productNum);
+                }
+                
+                Utils.showNotice(`📱 ${productNum}번 제품으로 미리보기 전환됨`);
+            }
+        };
+
+        // UI 컴포넌트 생성 모듈
+        const UIComponents = {
+            createPlaceholder: function(brandName) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'product-placeholder';
+                
+                const icon = document.createElement('div');
+                icon.className = 'product-icon';
+                icon.textContent = '🧴';
+                
+                const brand = document.createElement('div');
+                brand.style.fontSize = '0.5rem';
+                brand.style.color = '#9ca3af';
+                brand.textContent = brandName;
+                
+                placeholder.appendChild(icon);
+                placeholder.appendChild(brand);
+                
+                return placeholder;
+            }
+        };
+
+        // 시뮬레이터 제어 모듈
+        const SimulatorController = {
+            update: {
+                options: function() {
+                    const grid = get('optionsGrid');
+                    grid.innerHTML = '';
+                    
+                    for (let i = 1; i <= AppState.config.productCount; i++) {
+                        const product = AppState.products[i];
+                        const button = document.createElement('button');
+                        button.className = 'option-button';
+                        button.setAttribute('data-option', i);
+                        button.setAttribute('aria-label', '고민 ' + i + ' 선택하기');
+                        button.innerHTML = '<span class="option-text">' + (product.concern || ('고민 ' + i)) + '</span>';
+                        button.addEventListener('click', function() {
+                            SimulatorController.selectOption(i);
+                        });
+                        grid.appendChild(button);
+                    }
+                },
+                
+                productDetail: function(productNum) {
+                    const product = AppState.products[productNum];
+                    const brand = AppState.config.commonBrand;
+                    
+                    get('reviewText').textContent = product.productReview || '';
+                    get('ratingText').textContent = product.rating || '';
+                    get('highlightText').textContent = product.productHighlight || '';
+                    get('productNameText').textContent = brand + '\n' + product.productTitle;
+                    get('ctaButtonText').textContent = AppState.config.ctaText;
+                    
+                    SimulatorController.update.productImage(product, brand);
+                },
+                
+                productImage: function(product, brand) {
+                    const container = get('productImage');
+                    container.innerHTML = '';
+                    
+                    if (product.imageUrl && product.imageUrl.trim()) {
+                        const img = document.createElement('img');
+                        img.src = product.imageUrl;
+                        img.alt = product.productTitle || '제품 이미지';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        
+                        img.onerror = function() {
+                            container.innerHTML = '';
+                            container.appendChild(UIComponents.createPlaceholder(brand));
+                        };
+                        
+                        container.appendChild(img);
+                    } else {
+                        container.appendChild(UIComponents.createPlaceholder(brand));
+                    }
+                }
+            },
+            
+            showScreen: function(screenName) {
+                document.querySelectorAll('.screen').forEach(function(screen) {
+                    screen.classList.add('hidden');
+                });
+                document.getElementById(screenName + 'Screen').classList.remove('hidden');
+                AppState.currentScreen = screenName;
+            },
+            
+            selectOption: function(productNum) {
+                SimulatorController.showScreen('loading');
+                setTimeout(function() {
+                    SimulatorController.update.productDetail(productNum);
+                    SimulatorController.showScreen('product');
+                    
+                    // 제품 상세 화면 진입 시 AI 안내 알림 표시
+                    setTimeout(function() {
+                        const aiNotice = get('aiInfoNotice');
+                        if (aiNotice) {
+                            aiNotice.classList.add('show');
+                            
+                            // 5초 후 자동으로 숨김
+                            setTimeout(function() {
+                                aiNotice.classList.remove('show');
+                            }, 5000);
+                        }
+                    }, 1000);
+                }, 2000);
+            }
+        };
+
+        // 데이터 관리 모듈
+        const DataManager = {
+            save: {
+                brand: function() {
+                    AppState.config.commonBrand = get('brandInput').value;
+                },
+                
+                allProducts: function() {
+                    if (TableManager.currentEditingCell) {
+                        TableManager.saveCell(TableManager.currentEditingCell);
+                    }
+                }
+            },
+            
+            load: {
+                brand: function() {
+                    get('brandInput').value = AppState.config.commonBrand;
+                }
+            },
+            
+            reset: function() {
+                AppState.config.commonBrand = "닥터지";
+                AppState.currentProduct = 1;
+                AppState.currentScreen = 'main';
+                
+                const defaultProducts = {
+                    1: {
+                        concern: SAMPLE_DATA.concerns[0],
+                        productTitle: "레드 블레미쉬 클리어 수딩 크림 70ml",
+                        productHighlight: "모공 케어 & 진정 전문!",
+                        imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0020/A00000020679402ko.jpg",
+                        productReview: SAMPLE_DATA.review,
+                        rating: SAMPLE_DATA.rating
+                    },
+                    2: {
+                        concern: SAMPLE_DATA.concerns[1],
+                        productTitle: "어드밴스드 나이트 리페어 세럼 50ml",
+                        productHighlight: "안티에이징 & 주름 개선!",
+                        imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0019/A00000019800101ko.jpg",
+                        productReview: SAMPLE_DATA.review,
+                        rating: SAMPLE_DATA.rating
+                    },
+                    3: {
+                        concern: SAMPLE_DATA.concerns[2],
+                        productTitle: "네오 파운데이션 30ml",
+                        productHighlight: "매끄러운 피부 표현!",
+                        imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0018/A00000018965101ko.jpg",
+                        productReview: SAMPLE_DATA.review,
+                        rating: SAMPLE_DATA.rating
+                    },
+                    4: {
+                        concern: SAMPLE_DATA.concerns[3],
+                        productTitle: "페이셜 트리트먼트 에센스 230ml",
+                        productHighlight: "프리미엄 탄력 케어!",
+                        imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0015/A00000015234101ko.jpg",
+                        productReview: SAMPLE_DATA.review,
+                        rating: SAMPLE_DATA.rating
+                    }
+                };
+                
+                AppState.products = {};
+                for (let key in defaultProducts) {
+                    AppState.products[key] = defaultProducts[key];
+                }
+            }
+        };
+
+        // 이벤트 관리 모듈  
+        const EventManager = {
+            init: function() {
+                get('brandInput').addEventListener('input', function() {
+                    DataManager.save.brand();
+                    SimulatorController.update.options();
+                    Utils.showNotice();
+                });
+                
+                // 전역 키보드 이벤트
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && TableManager.currentEditingCell) {
+                        TableManager.cancelEdit(TableManager.currentEditingCell);
+                    }
+                });
+                
+                // 전역 클릭 이벤트 (편집 취소용)
+                document.addEventListener('click', function(e) {
+                    if (TableManager.currentEditingCell && 
+                        !TableManager.currentEditingCell.contains(e.target) &&
+                        !e.target.classList.contains('editable-cell')) {
+                        TableManager.currentEditingCell.blur();
+                    }
+                });
+            }
+        };
+
+        // 유틸리티 모듈
+        const Utils = {
+            showNotice: function(message) {
+                message = message || '⚡ 실시간 업데이트됨';
+                const notice = get('updateNotice');
+                notice.textContent = message;
+                notice.classList.add('show');
+                setTimeout(function() {
+                    notice.classList.remove('show');
+                }, 3000);
+            },
+            
+            generateCSV: function() {
+                const headers = [
+                    '고민번호',
+                    '피부고민',
+                    '브랜드명',
+                    '제품명',
+                    '고객리뷰',
+                    '별점정보',
+                    '제품특징',
+                    '상품이미지URL'
+                ];
+                
+                const csvData = [headers.join(',')];
+                
+                for (let i = 1; i <= AppState.config.productCount; i++) {
+                    const product = AppState.products[i];
+                    const row = [
+                        i,
+                        '"' + (product.concern || '').replace(/"/g, '""').replace(/\n/g, ' ') + '"',
+                        '"' + AppState.config.commonBrand.replace(/"/g, '""') + '"',
+                        '"' + (product.productTitle || '').replace(/"/g, '""') + '"',
+                        '"' + (product.productReview || '').replace(/"/g, '""').replace(/\n/g, ' ') + '"',
+                        '"' + (product.rating || '').replace(/"/g, '""') + '"',
+                        '"' + (product.productHighlight || '').replace(/"/g, '""') + '"',
+                        '"' + (product.imageUrl || '').replace(/"/g, '""') + '"'
+                    ];
+                    csvData.push(row.join(','));
+                }
+                
+                return csvData.join('\n');
+            },
+            
+            downloadFile: function(content, filename, type) {
+                type = type || 'text/csv';
+                const blob = content instanceof Blob ? content : new Blob(['\uFEFF' + content], { type: type + ';charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        // 메인 애플리케이션 객체
+        const App = {
+            init: function() {
+                DataManager.load.brand();
+                TableManager.createTable();
+                SimulatorController.update.options();
+                EventManager.init();
+            },
+            
+            goBack: function() {
+                SimulatorController.showScreen('main');
+            },
+            
+            handleCTA: function() {
+                alert('CTA 버튼이 클릭되었습니다!');
+            },
+            
+            reset: function() {
+                DataManager.reset();
+                AppState.currentProduct = 1;
+                
+                DataManager.load.brand();
+                TableManager.createTable();
+                SimulatorController.update.options();
+                SimulatorController.showScreen('main');
+                
+                Utils.showNotice('🔄 초기값으로 리셋되었습니다!');
+            },
+            
+            exportData: function() {
+                DataManager.save.allProducts();
+                DataManager.save.brand();
+                
+                const csvContent = Utils.generateCSV();
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+                const filename = AppState.config.commonBrand + '_BuzzAd_잘고른리뷰_광고데이터_' + dateStr + '.csv';
+                
+                if (Utils.downloadFile(csvContent, filename)) {
+                    Utils.showNotice('📊 CSV 파일이 다운로드되었습니다!');
+                } else {
+                    alert('브라우저에서 파일 다운로드를 지원하지 않습니다.');
+                }
+            },
+            
+            captureScreens: function() {
+                // HTML2Canvas 라이브러리 로드
+                if (!window.html2canvas) {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                    script.onload = () => {
+                        this.performCapture();
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    this.performCapture();
+                }
+            },
+
+            performCapture: function() {
+                Utils.showNotice('📸 화면 캡처 중...');
+                
+                // 시뮬레이터 화면만 캡처
+                const phoneScreen = document.querySelector('.phone-screen');
+                
+                html2canvas(phoneScreen, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, // 고해상도
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    width: phoneScreen.offsetWidth,
+                    height: phoneScreen.offsetHeight
+                }).then(canvas => {
+                    // Canvas를 이미지로 변환
+                    const link = document.createElement('a');
+                    const now = new Date();
+                    const dateStr = now.toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+                    const filename = `${AppState.config.commonBrand}_잘고른리뷰_시뮬레이터_${dateStr}.png`;
+                    
+                    link.download = filename;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    Utils.showNotice('📸 화면 캡처가 완료되었습니다!');
+                }).catch(error => {
+                    console.error('캡처 오류:', error);
+                    Utils.showNotice('❌ 화면 캡처 중 오류가 발생했습니다');
+                });
+            }
+        };
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', App.init);
+    </script>
+<div class="capture-modal hidden" id="captureModal">
+<div class="capture-overlay"></div>
+<div class="capture-content">
+<div class="capture-header">
+<h3>📸 화면 캡처</h3>
+<button class="capture-close" onclick="closeCaptureModal()">×</button>
+</div>
+<div class="capture-progress">
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+<div class="progress-text" id="progressText">ZIP 파일로 다운로드할 화면을 확인해주세요</div>
+</div>
+<div class="capture-previews">
+<div class="preview-container">
+<div class="preview-title">고민 선택 화면</div>
+<div class="preview-frame" id="previewFrame1">
+<div class="preview-loading">로딩 중...</div>
+</div>
+<div class="preview-status" id="status1">준비 중</div>
+</div>
+<div class="preview-container">
+<div class="preview-title">제품 상세 화면</div>
+<div class="preview-frame" id="previewFrame2">
+<div class="preview-loading">로딩 중...</div>
+</div>
+<div class="preview-status" id="status2">준비 중</div>
+</div>
+</div>
+<div class="capture-actions">
+<button class="capture-button" id="captureButton" onclick="startCapture()" style="display: none;">
+                        캡처 시작
+                    </button>
+</div>
+</div>
+</div>
+<script id="legacy-capture-js">
+
+        // 전역 함수로 캡처 모달 열기
+        window.testButtonClick = function() {
+            openCaptureModal();
+        };
+
+        // 캡처 모달 열기
+        function openCaptureModal() {
+            // 현재 데이터 저장
+            saveCurrentProductData();
+            
+            // 모달 표시
+            get('captureModal').classList.remove('hidden');
+            
+            // 프로그레스 초기화
+            updateProgress(0, '미리보기를 생성하고 있습니다...');
+            
+            // 상태 초기화
+            get('status1').textContent = '준비 중';
+            get('status2').textContent = '준비 중';
+            get('captureButton').disabled = false;
+            
+            // html2canvas 라이브러리 로드
+            loadHtml2Canvas().then(() => {
+                // 미리보기 생성
+                generatePreviews();
+            });
+        }
+
+        // 캡처 모달 닫기
+        function closeCaptureModal() {
+            get('captureModal').classList.add('hidden');
+        }
+
+        // 프로그레스 업데이트
+        function updateProgress(percentage, text) {
+            get('progressFill').style.width = percentage + '%';
+            get('progressText').textContent = text;
+        }
+
+        // 미리보기 생성
+        async function generatePreviews() {
+            try {
+                updateProgress(25, '고민 선택 화면 미리보기 생성 중...');
+                
+                // 1. 메인 화면 미리보기 생성
+                const mainPreview = await generateMainPreview();
+                get('previewFrame1').innerHTML = '';
+                get('previewFrame1').appendChild(mainPreview);
+                get('status1').textContent = '미리보기 완료';
+                get('status1').className = 'preview-status completed';
+                
+                updateProgress(50, '제품 상세 화면 미리보기 생성 중...');
+                
+                // 2. 제품 상세 화면 미리보기 생성
+                const productPreview = await generateProductPreview();
+                get('previewFrame2').innerHTML = '';
+                get('previewFrame2').appendChild(productPreview);
+                get('status2').textContent = '미리보기 완료';
+                get('status2').className = 'preview-status completed';
+                
+                updateProgress(75, '미리보기 완료! 자동으로 캡처를 시작합니다...');
+                
+                // 캡처 버튼 숨기기
+                get('captureButton').style.display = 'none';
+                
+                // 1초 후 자동으로 캡처 시작
+                setTimeout(() => {
+                    startAutoCapture();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('미리보기 생성 오류:', error);
+                updateProgress(0, '미리보기 생성 중 오류가 발생했습니다');
+            }
+        }
+
+        // 자동 캡처 시작 (ZIP 다운로드 방식)
+        async function startAutoCapture() {
+            try {
+                updateProgress(80, 'ZIP 파일 생성을 위한 이미지 캡처 중...');
+                
+                // JSZip 라이브러리 로드
+                await loadJSZip();
+                
+                // 상태 업데이트
+                get('status1').textContent = '캡처 중...';
+                get('status1').className = 'preview-status processing';
+                get('status2').textContent = '캡처 중...';
+                get('status2').className = 'preview-status processing';
+                
+                // ZIP 객체 생성
+                const zip = new JSZip();
+                
+                updateProgress(85, '고민 선택 화면 캡처 중...');
+                
+                // 1. 메인 화면 캡처 (ZIP에 추가)
+                const mainCanvas = await generateMainImageForZip();
+                const mainBlob = await new Promise(resolve => mainCanvas.toBlob(resolve, 'image/png'));
+                zip.file('닥터지_BuzzAd_고민선택화면.png', mainBlob);
+                
+                get('status1').textContent = '캡처 완료';
+                get('status1').className = 'preview-status completed';
+                
+                updateProgress(90, '제품 상세 화면 캡처 중...');
+                
+                // 2. 제품 상세 화면 캡처 (ZIP에 추가)
+                const productCanvas = await generateProductImageForZip();
+                const productBlob = await new Promise(resolve => productCanvas.toBlob(resolve, 'image/png'));
+                const data = productDataStore[1];
+                const concernName = (data.concern || '').replace(/\n/g, '').replace(/[^\w가-힣]/g, '').substring(0, 10);
+                zip.file(`닥터지_BuzzAd_제품상세화면_${concernName}.png`, productBlob);
+                
+                get('status2').textContent = '캡처 완료';
+                get('status2').className = 'preview-status completed';
+                
+                updateProgress(95, 'ZIP 파일 생성 중...');
+                
+                // ZIP 파일 생성 및 다운로드
+                const zipContent = await zip.generateAsync({type: 'blob'});
+                const now = Date.now();
+                const zipFilename = `닥터지_BuzzAd_화면캡처_${now}.zip`;
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(zipContent);
+                link.download = zipFilename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                
+                updateProgress(100, 'ZIP 파일 다운로드가 완료되었습니다! 🎉');
+                
+                // 1.5초 후 자동으로 모달 닫기
+                setTimeout(() => {
+                    closeCaptureModal();
+                    showUpdateNotice('📸 ZIP 파일 다운로드가 완료되었습니다!');
+                }, 1500);
+                
+            } catch (error) {
+                console.error('ZIP 캡처 오류:', error);
+                updateProgress(0, 'ZIP 생성 중 오류가 발생했습니다');
+                // 오류 시 캡처 버튼 다시 표시
+                get('captureButton').style.display = 'block';
+                get('captureButton').disabled = false;
+                get('captureButton').textContent = '다시 시도';
+            }
+        }
+
+        // JSZip 라이브러리 로드
+        function loadJSZip() {
+            return new Promise((resolve, reject) => {
+                if (window.JSZip) {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // ZIP용 메인 화면 이미지 생성 (Canvas 반환)
+
+function generateMainImageForZip() {
+    return _captureCanvas('main');
+}
+
+        // ZIP용 제품 상세 화면 이미지 생성 (Canvas 반환)
+
+        function generateProductImageForZip() {
+            return new Promise((resolve) => {
+                const data = productDataStore[1];
+                const container = document.createElement('div');
+                container.style.position = 'fixed';
+                container.style.left = '-9999px';
+                container.style.top = '0';
+                container.style.width = '320px';
+                container.style.height = '640px';
+                
+                container.innerHTML = `
+                    <style>
+                        .zip-phone-frame { width: 320px; height: 640px; background: var(--border-color); border-radius: 2rem; padding: 1rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+                        .zip-phone-screen { width: 100%; height: 100%; background: #fff; border-radius: 1.5rem; overflow: hidden; }
+                        .zip-product-screen { background: #ffffff; padding: 1rem 0.75rem; display: flex; flex-direction: column; position: relative; min-height: 100%; }
+                        .zip-back-button { border-radius: 50%; padding: 0.5rem; width: 2rem; height: 2rem; background: #f8f9fa; border: none; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+                        .zip-review-container { position: relative; padding: 1rem; padding-top: 1.5rem; border-radius: 0.5rem; background: #f8f9fa; width: 100%; margin-bottom: 1.5rem; }
+                        .zip-review-icon { position: absolute; top: -0.75rem; left: 50%; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
+                        .zip-review-text { color: rgba(51, 51, 51, 0.8); font-size: 0.6rem; line-height: 1.4; text-align: left; width: 100%; margin-bottom: 0.5rem; }
+                        .zip-rating { font-weight: 600; font-size: 0.55rem; color: #D81E1F; text-align: center; margin-bottom: 0.5rem; }
+                        .zip-highlight { color: var(--border-color)333; font-size: 0.6rem; font-weight: 600; text-align: center; }
+                        .zip-product-info { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; flex: 1; justify-content: center; }
+                        .zip-product-image { width: 6rem; height: 6rem; border-radius: 0.75rem; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+                        .zip-product-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
+                        .zip-brand-text { font-size: 0.5rem; color: #9ca3af; }
+                        .zip-product-name { color: var(--border-color)333; font-size: 0.65rem; font-weight: 500; text-align: center; line-height: 1.3; white-space: pre-line; }
+                        .zip-cta-button { position: absolute; bottom: 0; left: 0; right: 0; width: 100%; padding: 0.75rem; background: #D2302F; color: white; font-weight: 600; font-size: 0.7rem; text-align: center; }
+                    </style>
+                    <div class="zip-phone-frame">
+                        <div class="zip-phone-screen">
+                            <div class="zip-product-screen">
+                                <div class="zip-back-button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" fill="none">
+                                        <path d="M20 26L10 16L20 6" stroke="var(--border-color)333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </div>
+
+                                <div class="zip-review-container">
+                                    <div class="zip-review-icon">💭</div>
+                                    <div class="zip-review-text">${(data.productReview || '').substring(0, 200)}...</div>
+                                    <div class="zip-rating">${data.rating || ''}</div>
+                                    <div class="zip-highlight">${data.productHighlight || ''}</div>
+                                </div>
+
+                                <div class="zip-product-info">
+                                    <div class="zip-product-image">
+                                        <div class="zip-product-icon">🧴</div>
+                                        <div class="zip-brand-text">${data.brandName || '브랜드'}</div>
+                                    </div>
+                                    <div class="zip-product-name">${data.brandName}\n${data.productTitle}</div>
+                                </div>
+
+                                <div class="zip-cta-button">
+                                    ${data.ctaText || ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(container);
+                
+                setTimeout(() => {
+                    html2canvas(container, {
+                        backgroundColor: null,
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: false,
+                        logging: false
+                    }).then(canvas => {
+                        document.body.removeChild(container);
+                        resolve(canvas);
+                    });
+                }, 500);
+            });
+        }
+
+        // 메인 화면 미리보기 생성
+        function generateMainPreview() {
+            return new Promise((resolve) => {
+                const container = document.createElement('div');
+                container.style.width = '160px';
+                container.style.height = '320px';
+                container.style.transform = 'scale(0.5)';
+                container.style.transformOrigin = 'top left';
+                container.style.position = 'relative';
+                
+                container.innerHTML = `
+                    <div style="width: 320px; height: 640px; background: var(--border-color); border-radius: 2rem; padding: 1rem; position: relative;">
+                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1.5rem; padding: 4rem 1rem 2rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+                            <div style="text-align: center; font-size: 0.9rem; font-weight: bold; color: var(--border-color); line-height: 1.4;">
+                                지금 내 피부고민을 선택하고<br>용돈을 받아보세요!
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.25rem;">
+                                <div style="width: 5.5rem; height: 5.5rem; background: white; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                    <span style="font-size: 0.7rem; text-align: center; padding: 0.5rem;">${productDataStore[1]?.concern || '넓은 모공'}</span>
+                                </div>
+                                <div style="width: 5.5rem; height: 5.5rem; background: white; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                    <span style="font-size: 0.7rem; text-align: center; padding: 0.5rem;">${productDataStore[2]?.concern || '눈가·팔자 등 깊은 주름'}</span>
+                                </div>
+                                <div style="width: 5.5rem; height: 5.5rem; background: white; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                    <span style="font-size: 0.7rem; text-align: center; padding: 0.5rem;">${productDataStore[3]?.concern || '메이크업 시 들뜨는 피부결'}</span>
+                                </div>
+                                <div style="width: 5.5rem; height: 5.5rem; background: white; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                    <span style="font-size: 0.7rem; text-align: center; padding: 0.5rem;">${productDataStore[4]?.concern || '피부 탄력'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => resolve(container), 100);
+            });
+        }
+
+        // 제품 상세 화면 미리보기 생성
+        function generateProductPreview() {
+            return new Promise((resolve) => {
+                const data = productDataStore[1];
+                const container = document.createElement('div');
+                container.style.width = '160px';
+                container.style.height = '320px';
+                container.style.transform = 'scale(0.5)';
+                container.style.transformOrigin = 'top left';
+                container.style.position = 'relative';
+                
+                container.innerHTML = `
+                    <div style="width: 320px; height: 640px; background: var(--border-color); border-radius: 2rem; padding: 1rem; position: relative;">
+                        <div style="width: 100%; height: 100%; background: white; border-radius: 1.5rem; padding: 1rem 0.75rem; position: relative;">
+                            <div style="width: 2rem; height: 2rem; background: #f8f9fa; border-radius: 50%; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center;">
+                                <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><path d="M20 26L10 16L20 6" stroke="var(--border-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            
+                            <div style="background: #f8f9fa; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; position: relative;">
+                                <div style="position: absolute; top: -0.75rem; left: 50%; width: 1.5rem; height: 1.5rem; background: white; border-radius: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">💭</div>
+                                <div style="font-size: 0.6rem; color: rgba(51,51,51,0.8); line-height: 1.4; margin-bottom: 0.5rem;">${(data.productReview || '').substring(0, 100)}...</div>
+                                <div style="font-size: 0.55rem; color: #D81E1F; text-align: center; margin-bottom: 0.5rem;">${data.rating || ''}</div>
+                                <div style="font-size: 0.6rem; color: var(--border-color); font-weight: 600; text-align: center;">${data.productHighlight || ''}</div>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; flex: 1; justify-content: center;">
+                                <div style="width: 6rem; height: 6rem; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); border-radius: 0.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">🧴</div>
+                                    <div style="font-size: 0.5rem; color: #9ca3af;">${data.brandName || '브랜드'}</div>
+                                </div>
+                                <div style="font-size: 0.65rem; color: var(--border-color); text-align: center; line-height: 1.3;">${data.brandName}<br>${data.productTitle}</div>
+                            </div>
+                            
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: #D2302F; color: white; padding: 0.75rem; text-align: center; font-size: 0.7rem; font-weight: 600;">
+                                ${data.ctaText || ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => resolve(container), 100);
+            });
+        }
+
+        // 캡처 시작
+        async function startCapture() {
+            const button = get('captureButton');
+            button.disabled = true;
+            button.textContent = '캡처 중...';
+            
+            try {
+                // 상태 업데이트
+                get('status1').textContent = '캡처 중...';
+                get('status1').className = 'preview-status processing';
+                updateProgress(25, '고민 선택 화면 캡처 중...');
+                
+                // 1. 메인 화면 캡처
+                await generateMainImageSeparate();
+                get('status1').textContent = '캡처 완료';
+                get('status1').className = 'preview-status completed';
+                
+                updateProgress(50, '제품 상세 화면 캡처 중...');
+                get('status2').textContent = '캡처 중...';
+                get('status2').className = 'preview-status processing';
+                
+                // 2초 대기
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 2. 제품 상세 화면 캡처
+                await generateProductImageSeparate();
+                get('status2').textContent = '캡처 완료';
+                get('status2').className = 'preview-status completed';
+                
+                updateProgress(100, '모든 이미지 캡처가 완료되었습니다! 🎉');
+                
+                button.textContent = '완료';
+                setTimeout(() => {
+                    closeCaptureModal();
+                    showUpdateNotice('📸 이미지 캡처가 완료되었습니다!');
+                }, 1500);
+                
+            } catch (error) {
+                console.error('캡처 오류:', error);
+                updateProgress(0, '캡처 중 오류가 발생했습니다');
+                button.disabled = false;
+                button.textContent = '다시 시도';
+            }
+        }
+
+        // html2canvas 라이브러리 로드
+        function loadHtml2Canvas() {
+            return new Promise((resolve, reject) => {
+                if (window.html2canvas) {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+// 공통 캡처 함수 (모달용 & ZIP용)
+async function _captureCanvas(screen) {
+    await loadHtml2Canvas();
+    const targetId = screen === 'main' ? 'mainScreen' : 'productScreen';
+    const target = document.getElementById(targetId);
+    if(!target) throw new Error('Screen not found: '+screen);
+    // show target if it was hidden
+    const wasHidden = target.classList.contains('hidden');
+    if(wasHidden) target.classList.remove('hidden');
+    const frame = target.closest('.phone-frame');
+    const clone = frame.cloneNode(true);
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.left = '-9999px';
+    wrapper.style.top = '0';
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+    await new Promise(r=>setTimeout(r,100));
+    const canvas = await html2canvas(clone, {backgroundColor:'#ffffff', scale:2, useCORS:true});
+    document.body.removeChild(wrapper);
+    if(wasHidden) target.classList.add('hidden');
+    return canvas;
+}
+
+        // 완전 분리된 메인 화면 HTML 생성 및 캡처
+        function generateMainImageSeparate() {
+            // 완전히 독립된 컨테이너 생성
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.left = '0';
+            container.style.top = '0';
+            container.style.width = '320px';
+            container.style.height = '640px';
+            container.style.zIndex = '9999';
+            container.style.backgroundColor = 'white';
+            
+            // 메인 화면 HTML 완전 재생성
+            container.innerHTML = `
+                <style>
+                    .isolated-phone-frame {
+                        width: 320px;
+                        height: 640px;
+                        background: var(--border-color);
+                        border-radius: 2rem;
+                        padding: 1rem;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                        position: relative;
+                    }
+                    .isolated-phone-screen {
+                        width: 100%;
+                        height: 100%;
+                        background: #fff;
+                        border-radius: 1.5rem;
+                        overflow: hidden;
+                        position: relative;
+                    }
+                    .isolated-main-screen {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 1.5rem;
+                        padding: 4rem 1rem 2rem;
+                        height: 100%;
+                        box-sizing: border-box;
+                    }
+                    .isolated-title {
+                        text-align: center;
+                        font-size: 0.9rem;
+                        font-weight: bold;
+                        color: var(--border-color)333;
+                        white-space: pre-line;
+                        line-height: 1.4;
+                    }
+                    .isolated-options-grid {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 0.25rem;
+                    }
+                    .isolated-option-button {
+                        border-radius: 0.5rem;
+                        background: #ffffff;
+                        width: 5.5rem;
+                        height: 5.5rem;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border: none;
+                    }
+                    .isolated-option-text {
+                        font-weight: 500;
+                        font-size: 0.7rem;
+                        line-height: 1.2;
+                        color: var(--border-color)333;
+                        white-space: pre-line;
+                        text-align: center;
+                        padding: 0.5rem;
+                    }
+                </style>
+                <div class="isolated-phone-frame">
+                    <div class="isolated-phone-screen">
+                        <div class="isolated-main-screen">
+                            <div class="isolated-title">지금 내 피부고민을 선택하고 
+용돈을 받아보세요!</div>
+                            
+                            <div class="isolated-options-grid">
+                                <div class="isolated-option-button">
+                                    <span class="isolated-option-text">${productDataStore[1]?.concern || '넓은 모공'}</span>
+                                </div>
+                                <div class="isolated-option-button">
+                                    <span class="isolated-option-text">${productDataStore[2]?.concern || '눈가·팔자 등\n깊은 주름'}</span>
+                                </div>
+                                <div class="isolated-option-button">
+                                    <span class="isolated-option-text">${productDataStore[3]?.concern || '메이크업 시\n들뜨는 피부결'}</span>
+                                </div>
+                                <div class="isolated-option-button">
+                                    <span class="isolated-option-text">${productDataStore[4]?.concern || '피부 탄력'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // DOM에 추가
+            document.body.appendChild(container);
+            
+            // 렌더링 완료 대기
+            setTimeout(() => {
+                html2canvas(container, {
+                    backgroundColor: null,
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: false
+                }).then(canvas => {
+                    // 다운로드
+                    const now = Date.now();
+                    const filename = `닥터지_BuzzAd_고민선택화면_${now}.png`;
+                    const dataURL = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = dataURL;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // 컨테이너 제거
+                    document.body.removeChild(container);
+                    
+                    console.log('메인 화면 캡처 완료');
+                }).catch(error => {
+                    console.error('메인 화면 캡처 오류:', error);
+                    document.body.removeChild(container);
+                });
+            }, 500);
+        }
+
+        // 완전 분리된 제품 상세 화면 HTML 생성 및 캡처
+        function generateProductImageSeparate() {
+            const data = productDataStore[1];
+            
+            // 완전히 독립된 컨테이너 생성
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.left = '0';
+            container.style.top = '0';
+            container.style.width = '320px';
+            container.style.height = '640px';
+            container.style.zIndex = '9999';
+            container.style.backgroundColor = 'white';
+            
+            // 제품 상세 화면 HTML 완전 재생성
+            container.innerHTML = `
+                <style>
+                    .isolated-phone-frame {
+                        width: 320px;
+                        height: 640px;
+                        background: var(--border-color);
+                        border-radius: 2rem;
+                        padding: 1rem;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                        position: relative;
+                    }
+                    .isolated-phone-screen {
+                        width: 100%;
+                        height: 100%;
+                        background: #fff;
+                        border-radius: 1.5rem;
+                        overflow: hidden;
+                        position: relative;
+                    }
+                    .isolated-product-screen {
+                        background: #ffffff;
+                        padding: 1rem 0.75rem;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0;
+                        justify-content: flex-start;
+                        position: relative;
+                        min-height: 100%;
+                    }
+                    .isolated-back-button {
+                        border-radius: 50%;
+                        padding: 0.5rem;
+                        width: 2rem;
+                        height: 2rem;
+                        background: #f8f9fa;
+                        border: none;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 1rem;
+                    }
+                    .isolated-review-container {
+                        position: relative;
+                        padding: 1rem;
+                        padding-top: 1.5rem;
+                        border-radius: 0.5rem;
+                        background: #f8f9fa;
+                        width: 100%;
+                        margin-bottom: 1.5rem;
+                    }
+                    .isolated-review-icon {
+                        position: absolute;
+                        top: -0.75rem;
+                        left: 50%;
+                        width: 1.5rem;
+                        height: 1.5rem;
+                        border-radius: 50%;
+                        background: #ffffff;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                        transform: translateX(-50%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 0.75rem;
+                    }
+                    .isolated-review-text {
+                        white-space: pre-line;
+                        color: rgba(51, 51, 51, 0.8);
+                        font-size: 0.6rem;
+                        line-height: 1.4;
+                        text-align: left;
+                        width: 100%;
+                        margin-bottom: 0.5rem;
+                    }
+                    .isolated-rating {
+                        font-weight: 600;
+                        font-size: 0.55rem;
+                        color: #D81E1F;
+                        text-align: center;
+                        margin-bottom: 0.5rem;
+                    }
+                    .isolated-highlight {
+                        color: var(--border-color)333;
+                        font-size: 0.6rem;
+                        font-weight: 600;
+                        text-align: center;
+                    }
+                    .isolated-product-info {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 0.75rem;
+                        margin-bottom: 1.5rem;
+                        flex: 1;
+                        justify-content: center;
+                    }
+                    .isolated-product-image {
+                        width: 6rem;
+                        height: 6rem;
+                        border-radius: 0.75rem;
+                        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    }
+                    .isolated-product-icon {
+                        font-size: 1.5rem;
+                        margin-bottom: 0.25rem;
+                    }
+                    .isolated-brand-text {
+                        font-size: 0.5rem;
+                        color: #9ca3af;
+                    }
+                    .isolated-product-name {
+                        color: var(--border-color)333;
+                        font-size: 0.65rem;
+                        font-weight: 500;
+                        text-align: center;
+                        line-height: 1.3;
+                        white-space: pre-line;
+                    }
+                    .isolated-cta-button {
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        width: 100%;
+                        padding: 0.75rem;
+                        background: #D2302F;
+                        color: white;
+                        font-weight: 600;
+                        font-size: 0.7rem;
+                        border: none;
+                        text-align: center;
+                    }
+                </style>
+                <div class="isolated-phone-frame">
+                    <div class="isolated-phone-screen">
+                        <div class="isolated-product-screen">
+                            <div class="isolated-back-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" fill="none">
+                                    <path d="M20 26L10 16L20 6" stroke="var(--border-color)333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </div>
+
+                            <div class="isolated-review-container">
+                                <div class="isolated-review-icon">💭</div>
+                                <div class="isolated-review-text">${data.productReview || ''}</div>
+                                <div class="isolated-rating">${data.rating || ''}</div>
+                                <div class="isolated-highlight">${data.productHighlight || ''}</div>
+                            </div>
+
+                            <div class="isolated-product-info">
+                                <div class="isolated-product-image">
+                                    <div class="isolated-product-icon">🧴</div>
+                                    <div class="isolated-brand-text">${data.brandName || '브랜드'}</div>
+                                </div>
+                                <div class="isolated-product-name">${data.brandName}\n${data.productTitle}</div>
+                            </div>
+
+                            <div class="isolated-cta-button">
+                                ${data.ctaText || ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // DOM에 추가
+            document.body.appendChild(container);
+            
+            // 렌더링 완료 대기
+            setTimeout(() => {
+                html2canvas(container, {
+                    backgroundColor: null,
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: false
+                }).then(canvas => {
+                    // 다운로드
+                    const now = Date.now();
+                    const concernName = (data.concern || '').replace(/\n/g, '').substring(0, 10);
+                    const filename = `닥터지_BuzzAd_제품상세화면_${concernName}_${now}.png`;
+                    const dataURL = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = dataURL;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // 컨테이너 제거
+                    document.body.removeChild(container);
+                    
+                    console.log('제품 상세 화면 캡처 완료');
+                    showUpdateNotice('📸 이미지 생성이 완료되었습니다!');
+                }).catch(error => {
+                    console.error('제품 상세 화면 캡처 오류:', error);
+                    document.body.removeChild(container);
+                });
+            }, 500);
+        }
+
+        // 메인 화면 이미지 생성 (실제 시뮬레이터 스타일)
+        function generateMainImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 640; // 고해상도 (320*2)
+            canvas.height = 1280; // 고해상도 (640*2)
+            const ctx = canvas.getContext('2d');
+            ctx.scale(2, 2); // 고해상도 렌더링
+            
+            // 전체 투명 배경
+            ctx.clearRect(0, 0, 320, 640);
+            
+            // 핸드폰 프레임 (검은색 둥근 사각형)
+            ctx.fillStyle = 'var(--border-color)333';
+            roundRect(ctx, 0, 0, 320, 640, 32); // 2rem = 32px
+            ctx.fill();
+            
+            // 내부 화면 영역 (흰색 둥근 사각형)
+            ctx.fillStyle = '#ffffff';
+            roundRect(ctx, 16, 16, 288, 608, 24); // 1.5rem = 24px
+            ctx.fill();
+            
+            // 화면 내부 배경 (그라데이션)
+            const gradient = ctx.createLinearGradient(16, 16, 304, 624);
+            gradient.addColorStop(0, '#f8f9fa');
+            gradient.addColorStop(1, '#e9ecef');
+            ctx.fillStyle = gradient;
+            roundRect(ctx, 16, 16, 288, 608, 24);
+            ctx.fill();
+            
+            // 제목
+            ctx.fillStyle = 'var(--border-color)333';
+            ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('지금 내 피부고민을 선택하고', 160, 100);
+            ctx.fillText('용돈을 받아보세요!', 160, 120);
+            
+            // 옵션 버튼들 (실제 스타일 적용)
+            const buttonSize = 88; // 5.5rem
+            const gap = 4;
+            const startX = (320 - (buttonSize * 2 + gap)) / 2;
+            const startY = 160;
+            
+            for (let i = 0; i < 4; i++) {
+                const row = Math.floor(i / 2);
+                const col = i % 2;
+                const x = startX + col * (buttonSize + gap);
+                const y = startY + row * (buttonSize + gap);
+                
+                // 버튼 그림자
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+                roundRect(ctx, x + 2, y + 4, buttonSize, buttonSize, 8);
+                ctx.fill();
+                
+                // 버튼 배경 (흰색)
+                ctx.fillStyle = '#ffffff';
+                roundRect(ctx, x, y, buttonSize, buttonSize, 8);
+                ctx.fill();
+                
+                // 버튼 테두리
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.lineWidth = 1;
+                roundRect(ctx, x, y, buttonSize, buttonSize, 8);
+                ctx.stroke();
+                
+                // 텍스트
+                ctx.fillStyle = 'var(--border-color)333';
+                ctx.font = '500 11px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'center';
+                const concernText = productDataStore[i + 1]?.concern || `고민 ${i + 1}`;
+                const lines = concernText.split('\n');
+                const totalHeight = lines.length * 12;
+                const startTextY = y + buttonSize/2 - totalHeight/2 + 8;
+                
+                for (let j = 0; j < lines.length; j++) {
+                    ctx.fillText(lines[j], x + buttonSize/2, startTextY + (j * 12));
+                }
+            }
+            
+            // 다운로드
+            const now = Date.now();
+            const filename = `닥터지_BuzzAd_고민선택화면_${now}.png`;
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 제품 상세 화면 이미지 생성 (실제 시뮬레이터 스타일)
+        function generateProductImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 640; // 고해상도
+            canvas.height = 1280; // 고해상도
+            const ctx = canvas.getContext('2d');
+            ctx.scale(2, 2);
+            
+            const data = productDataStore[1];
+            
+            // 전체 투명 배경
+            ctx.clearRect(0, 0, 320, 640);
+            
+            // 핸드폰 프레임 (검은색 둥근 사각형)
+            ctx.fillStyle = 'var(--border-color)333';
+            roundRect(ctx, 0, 0, 320, 640, 32);
+            ctx.fill();
+            
+            // 내부 화면 영역 (흰색)
+            ctx.fillStyle = '#ffffff';
+            roundRect(ctx, 16, 16, 288, 608, 24);
+            ctx.fill();
+            
+            // 뒤로가기 버튼 (둥근 배경)
+            ctx.fillStyle = '#f8f9fa';
+            ctx.beginPath();
+            ctx.arc(44, 44, 16, 0, Math.PI * 2); // 16px 떨어진 곳에 위치
+            ctx.fill();
+            
+            // 뒤로가기 화살표
+            ctx.strokeStyle = 'var(--border-color)333';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(51, 38);
+            ctx.lineTo(41, 44);
+            ctx.lineTo(51, 50);
+            ctx.stroke();
+            
+            // 리뷰 컨테이너 (둥근 배경)
+            ctx.fillStyle = '#f8f9fa';
+            roundRect(ctx, 28, 76, 264, 100, 8);
+            ctx.fill();
+            
+            // 리뷰 아이콘 (흰색 원)
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 2;
+            ctx.beginPath();
+            ctx.arc(160, 64, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+            
+            // 리뷰 아이콘
+            ctx.fillStyle = 'var(--border-color)';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('💭', 160, 70);
+            
+            // 리뷰 텍스트
+            ctx.fillStyle = 'rgba(51, 51, 51, 0.8)';
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'left';
+            const reviewLines = wrapText(ctx, data.productReview || '제품 리뷰', 240);
+            for (let i = 0; i < Math.min(reviewLines.length, 3); i++) {
+                ctx.fillText(reviewLines[i], 40, 95 + (i * 12));
+            }
+            
+            // 별점
+            ctx.fillStyle = '#D81E1F';
+            ctx.font = 'bold 9px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(data.rating || '4.7/5', 160, 145);
+            
+            // 제품 특징
+            ctx.fillStyle = 'var(--border-color)333';
+            ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(data.productHighlight || '제품 특징', 160, 165);
+            
+            // 구분선 (둥근 사각형)
+            ctx.fillStyle = 'rgba(229, 231, 235, 0.2)';
+            roundRect(ctx, 144, 185, 32, 8, 4);
+            ctx.fill();
+            
+            // 제품 이미지 영역 (둥근 사각형 + 그림자)
+            const imgX = 112;
+            const imgY = 220;
+            const imgSize = 96;
+            
+            // 그림자
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetY = 4;
+            roundRect(ctx, imgX + 2, imgY + 2, imgSize, imgSize, 12);
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+            
+            // 제품 이미지 배경 (그라데이션)
+            const productGradient = ctx.createLinearGradient(imgX, imgY, imgX + imgSize, imgY + imgSize);
+            productGradient.addColorStop(0, '#f3f4f6');
+            productGradient.addColorStop(1, '#e5e7eb');
+            ctx.fillStyle = productGradient;
+            roundRect(ctx, imgX, imgY, imgSize, imgSize, 12);
+            ctx.fill();
+            
+            // 제품 아이콘
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🧴', imgX + imgSize/2, imgY + 40);
+            
+            // 브랜드명
+            ctx.font = '8px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(data.brandName || '브랜드', imgX + imgSize/2, imgY + 60);
+            
+            // 제품명
+            ctx.fillStyle = 'var(--border-color)333';
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            const productLines = [data.brandName || '', data.productTitle || ''];
+            for (let i = 0; i < productLines.length; i++) {
+                ctx.fillText(productLines[i], 160, 340 + (i * 12));
+            }
+            
+            // CTA 버튼 (하단)
+            ctx.fillStyle = '#D2302F';
+            ctx.fillRect(16, 584, 288, 40); // 프레임 안쪽에 맞춤
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(data.ctaText || 'CTA 버튼', 160, 608);
+            
+            // 다운로드
+            const now = Date.now();
+            const concernName = (data.concern || '').replace(/\n/g, '').substring(0, 10);
+            const filename = `닥터지_BuzzAd_제품상세화면_${concernName}_${now}.png`;
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 둥근 사각형 그리기 함수
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.arcTo(x + width, y, x + width, y + height, radius);
+            ctx.arcTo(x + width, y + height, x, y + height, radius);
+            ctx.arcTo(x, y + height, x, y, radius);
+            ctx.arcTo(x, y, x + width, y, radius);
+            ctx.closePath();
+        }
+
+        // 텍스트 줄바꿈 헬퍼 함수
+        function wrapText(ctx, text, maxWidth) {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            
+            for (let word of words) {
+                const testLine = currentLine + word + ' ';
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && currentLine !== '') {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            if (currentLine) {
+                lines.push(currentLine.trim());
+            }
+            return lines;
+        }
+
+        // 메모리 기반 데이터 저장소
+        const productDataStore = {
+            1: {
+                concern: "넓은 모공",
+                brandName: "닥터지",
+                productTitle: "레드 블레미쉬 클리어 수딩 크림 70ml",
+                productReview: "넓은 모공이 고민이었는데 이 크림 쓰고 나서 확실히 모공이 작아진 느낌이에요! 붉은기도 가라앉고 피부가 진정되는 느낌이 좋아요. 텍스처도 가볍고 끈적이지 않아서 여름에도 부담 없이 사용할 수 있어요. 꾸준히 사용하니까 피부 톤도 한결 균일해진 것 같아요.",
+                rating: "4.7/5 제품평(892건)",
+                productHighlight: "모공 케어 & 진정 전문!",
+                ctaText: "제품 구경하고 8P 용돈 받기",
+                imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0020/A00000020679402ko.jpg"
+            },
+            2: {
+                concern: "눈가·팔자 등\n깊은 주름",
+                brandName: "에스티로더",
+                productTitle: "어드밴스드 나이트 리페어 세럼 50ml",
+                productReview: "40대 들어서서 눈가 주름이 정말 신경 쓰였는데 이 세럼 사용하고 나서 확실히 달라진 게 느껴져요. 아침에 일어나면 피부가 촉촉하고 탄력 있어 보여요. 3개월 정도 꾸준히 쓰니까 주변에서 피부가 좋아졌다는 말을 많이 들어요. 가격이 부담되긴 하지만 효과가 확실해서 계속 쓰고 있어요.",
+                rating: "4.8/5 제품평(1,234건)",
+                productHighlight: "안티에이징 & 주름 개선!",
+                ctaText: "제품 구경하고 10P 용돈 받기",
+                imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0019/A00000019800101ko.jpg"
+            },
+            3: {
+                concern: "메이크업 시\n들뜨는 피부결",
+                brandName: "라네즈",
+                productTitle: "네오 파운데이션 30ml",
+                productReview: "메이크업할 때 항상 피부결이 거칠어 보여서 고민이었는데, 이 파운데이션은 정말 매끄럽게 발려요! 커버력도 좋고 하루 종일 무너지지 않아서 만족해요. 특히 모공이나 잔주름도 자연스럽게 커버해줘서 피부가 훨씬 깔끔해 보여요. 색상도 다양해서 내 피부톤에 맞는 걸 찾을 수 있어요.",
+                rating: "4.6/5 제품평(756건)",
+                productHighlight: "매끄러운 피부 표현!",
+                ctaText: "제품 구경하고 7P 용돈 받기",
+                imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0018/A00000018965101ko.jpg"
+            },
+            4: {
+                concern: "피부 탄력",
+                brandName: "SK-II",
+                productTitle: "페이셜 트리트먼트 에센스 230ml",
+                productReview: "나이가 들면서 피부 탄력이 떨어지는 게 고민이었는데, 이 에센스 쓰고 나서 피부가 정말 탱탱해진 느낌이에요! 2주 정도 쓰니까 피부 결이 달라지는 걸 느꼈고, 지금은 3개월째 쓰고 있는데 주변에서 피부가 좋아졌다고 많이 말해줘요. 값은 비싸지만 그만한 가치가 있다고 생각해요.",
+                rating: "4.9/5 제품평(2,341건)",
+                productHighlight: "프리미엄 탄력 케어!",
+                ctaText: "제품 구경하고 12P 용돈 받기",
+                imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0015/A00000015234101ko.jpg"
+            }
+        };
+
+        // 현재 선택된 제품 번호
+        let currentProduct = 1;
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProductData(1);
+            updateSimulator();
+            
+            // 폼 입력 이벤트 리스너 추가
+            const inputs = ['concernInput', 'brandNameInput', 'productTitleInput', 'productReviewInput', 'ratingInput', 'productHighlightInput', 'ctaTextInput', 'imageUrlInput'];
+            inputs.forEach(inputId => {
+                const element = document.getElementById(inputId);
+                if (element) {
+                    element.addEventListener('input', function() {
+                        saveCurrentProductData();
+                        updateSimulator();
+                        showUpdateNotice();
+                    });
+                }
+            });
+
+            // 옵션 버튼 클릭 이벤트
+            document.querySelectorAll('.option-button').forEach((button, index) => {
+                button.addEventListener('click', function() {
+                    const productNum = this.getAttribute('data-option');
+                    selectOption(productNum);
+                });
+            });
+        });
+
+        // 제품 탭 전환
+        function switchProduct(productNum) {
+            // 현재 제품 데이터 저장
+            saveCurrentProductData();
+            
+            // 탭 스타일 변경
+            document.querySelectorAll('.product-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`tab${productNum}`).classList.add('active');
+            
+            // 새 제품 데이터 로드
+            currentProduct = productNum;
+            loadProductData(productNum);
+            updateSimulator();
+        }
+
+        // 현재 폼의 데이터를 저장소에 저장
+        function saveCurrentProductData() {
+            productDataStore[currentProduct] = {
+                concern: get('concernInput').value,
+                brandName: get('brandNameInput').value,
+                productTitle: get('productTitleInput').value,
+                productReview: get('productReviewInput').value,
+                rating: get('ratingInput').value,
+                productHighlight: get('productHighlightInput').value,
+                ctaText: get('ctaTextInput').value,
+                imageUrl: get('imageUrlInput').value
+            };
+        }
+
+        // 제품 데이터를 폼에 로드
+        function loadProductData(productNum) {
+            const data = productDataStore[productNum];
+            if (data) {
+                get('concernInput').value = data.concern || '';
+                get('brandNameInput').value = data.brandName || '';
+                get('productTitleInput').value = data.productTitle || '';
+                get('productReviewInput').value = data.productReview || '';
+                get('ratingInput').value = data.rating || '';
+                get('productHighlightInput').value = data.productHighlight || '';
+                get('ctaTextInput').value = data.ctaText || '';
+                get('imageUrlInput').value = data.imageUrl || '';
+            }
+        }
+
+        // 시뮬레이터 업데이트
+        function updateSimulator() {
+            // 메인 화면의 옵션 텍스트 업데이트
+            for (let i = 1; i <= 4; i++) {
+                const data = productDataStore[i];
+                if (data && data.concern) {
+                    document.getElementById(`optionText${i}`).textContent = data.concern;
+                }
+            }
+        }
+
+        // 옵션 선택 시 로딩 화면으로 전환
+        function selectOption(productNum) {
+            // 메인 화면 숨기기
+            get('mainScreen').classList.add('hidden');
+            
+            // 로딩 화면 보이기
+            get('loadingScreen').classList.remove('hidden');
+            
+            // 2초 후 제품 상세 화면으로 전환
+            setTimeout(() => {
+                showProductScreen(productNum);
+            }, 2000);
+        }
+
+        // 제품 상세 화면 표시
+        function showProductScreen(productNum) {
+            const data = productDataStore[productNum];
+            
+            // 제품 상세 정보 업데이트
+            get('reviewText').textContent = data.productReview || '';
+            get('ratingText').textContent = data.rating || '';
+            get('highlightText').textContent = data.productHighlight || '';
+            get('productNameText').textContent = `${data.brandName}\n${data.productTitle}` || '';
+            get('ctaButtonText').textContent = data.ctaText || '';
+            
+            // 이미지 업데이트 - 안전한 방식으로 처리
+            const imageContainer = get('productImage');
+            imageContainer.innerHTML = ''; // 기존 내용 클리어
+            
+            if (data.imageUrl && data.imageUrl.trim()) {
+                // 이미지 요소 생성
+                const img = document.createElement('img');
+                img.src = data.imageUrl;
+                img.alt = data.productTitle || '제품 이미지';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                
+                // 이미지 로드 실패 시 플레이스홀더 표시
+                img.onerror = function() {
+                    const placeholder = createPlaceholder(data.brandName || '브랜드');
+                    imageContainer.innerHTML = '';
+                    imageContainer.appendChild(placeholder);
+                };
+                
+                imageContainer.appendChild(img);
+            } else {
+                // 이미지 URL이 없으면 플레이스홀더 표시
+                const placeholder = createPlaceholder(data.brandName || '브랜드');
+                imageContainer.appendChild(placeholder);
+            }
+            
+            // 화면 전환
+            get('loadingScreen').classList.add('hidden');
+            get('productScreen').classList.remove('hidden');
+        }
+
+        // 플레이스홀더 요소 생성 함수
+        function createPlaceholder(brandName) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'product-placeholder';
+            
+            const icon = document.createElement('div');
+            icon.className = 'product-icon';
+            icon.textContent = '🧴';
+            
+            const brand = document.createElement('div');
+            brand.style.fontSize = '0.5rem';
+            brand.style.color = '#9ca3af';
+            brand.textContent = brandName;
+            
+            placeholder.appendChild(icon);
+            placeholder.appendChild(brand);
+            
+            return placeholder;
+        }
+
+        // 뒤로가기
+        function goBack() {
+            get('productScreen').classList.add('hidden');
+            get('mainScreen').classList.remove('hidden');
+        }
+
+        // CTA 버튼 클릭
+        function handleCTA() {
+            alert('CTA 버튼이 클릭되었습니다!');
+        }
+
+        // 리셋 기능
+        function resetToDefault() {
+            // 기본값으로 리셋
+            const defaultData = {
+                1: {
+                    concern: "넓은 모공",
+                    brandName: "닥터지",
+                    productTitle: "레드 블레미쉬 클리어 수딩 크림 70ml",
+                    productReview: "넓은 모공이 고민이었는데 이 크림 쓰고 나서 확실히 모공이 작아진 느낌이에요! 붉은기도 가라앉고 피부가 진정되는 느낌이 좋아요. 텍스처도 가볍고 끈적이지 않아서 여름에도 부담 없이 사용할 수 있어요. 꾸준히 사용하니까 피부 톤도 한결 균일해진 것 같아요.",
+                    rating: "4.7/5 제품평(892건)",
+                    productHighlight: "모공 케어 & 진정 전문!",
+                    ctaText: "제품 구경하고 8P 용돈 받기",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0020/A00000020679402ko.jpg"
+                },
+                2: {
+                    concern: "눈가·팔자 등\n깊은 주름",
+                    brandName: "에스티로더",
+                    productTitle: "어드밴스드 나이트 리페어 세럼 50ml",
+                    productReview: "40대 들어서서 눈가 주름이 정말 신경 쓰였는데 이 세럼 사용하고 나서 확실히 달라진 게 느껴져요. 아침에 일어나면 피부가 촉촉하고 탄력 있어 보여요. 3개월 정도 꾸준히 쓰니까 주변에서 피부가 좋아졌다는 말을 많이 들어요. 가격이 부담되긴 하지만 효과가 확실해서 계속 쓰고 있어요.",
+                    rating: "4.8/5 제품평(1,234건)",
+                    productHighlight: "안티에이징 & 주름 개선!",
+                    ctaText: "제품 구경하고 10P 용돈 받기",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0019/A00000019800101ko.jpg"
+                },
+                3: {
+                    concern: "메이크업 시\n들뜨는 피부결",
+                    brandName: "라네즈",
+                    productTitle: "네오 파운데이션 30ml",
+                    productReview: "메이크업할 때 항상 피부결이 거칠어 보여서 고민이었는데, 이 파운데이션은 정말 매끄럽게 발려요! 커버력도 좋고 하루 종일 무너지지 않아서 만족해요. 특히 모공이나 잔주름도 자연스럽게 커버해줘서 피부가 훨씬 깔끔해 보여요. 색상도 다양해서 내 피부톤에 맞는 걸 찾을 수 있어요.",
+                    rating: "4.6/5 제품평(756건)",
+                    productHighlight: "매끄러운 피부 표현!",
+                    ctaText: "제품 구경하고 7P 용돈 받기",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0018/A00000018965101ko.jpg"
+                },
+                4: {
+                    concern: "피부 탄력",
+                    brandName: "SK-II",
+                    productTitle: "페이셜 트리트먼트 에센스 230ml",
+                    productReview: "나이가 들면서 피부 탄력이 떨어지는 게 고민이었는데, 이 에센스 쓰고 나서 피부가 정말 탱탱해진 느낌이에요! 2주 정도 쓰니까 피부 결이 달라지는 걸 느꼈고, 지금은 3개월째 쓰고 있는데 주변에서 피부가 좋아졌다고 많이 말해줘요. 값은 비싸지만 그만한 가치가 있다고 생각해요.",
+                    rating: "4.9/5 제품평(2,341건)",
+                    productHighlight: "프리미엄 탄력 케어!",
+                    ctaText: "제품 구경하고 12P 용돈 받기",
+                    imageUrl: "https://image.oliveyoung.co.kr/uploads/images/goods/400/10/0000/0015/A00000015234101ko.jpg"
+                }
+            };
+
+            // 데이터 저장소 초기화
+            for (let i = 1; i <= 4; i++) {
+                productDataStore[i] = { ...defaultData[i] };
+            }
+
+            // 첫 번째 탭으로 돌아가기
+            currentProduct = 1;
+            document.querySelectorAll('.product-tab').forEach(tab => tab.classList.remove('active'));
+            get('tab1').classList.add('active');
+
+            // 폼과 시뮬레이터 업데이트
+            loadProductData(1);
+            updateSimulator();
+
+            // 메인 화면으로 돌아가기
+            get('productScreen').classList.add('hidden');
+            get('loadingScreen').classList.add('hidden');
+            get('mainScreen').classList.remove('hidden');
+
+            showUpdateNotice();
+        }
+
+        // PNG 스크린샷 다운로드 기능
+        async function downloadScreenshots() {
+            showUpdateNotice('📸 화면 캡처 중... 잠시만 기다려주세요');
+            
+            try {
+                // html2canvas 라이브러리 동적 로드
+                if (!window.html2canvas) {
+                    await loadHtml2Canvas();
+                }
+                
+                // 현재 데이터 저장
+                saveCurrentProductData();
+                
+                // 1. 메인 화면 (고민 선택 페이지) 캡처
+                await captureMainScreen();
+                
+                // 2. 제품 상세 화면 (최종 결과 페이지) 캡처 - 첫 번째 제품으로
+                await captureProductScreen(1);
+                
+                showUpdateNotice('📸 화면 캡처가 완료되었습니다!');
+                
+            } catch (error) {
+                console.error('스크린샷 생성 중 오류:', error);
+                showUpdateNotice('❌ 화면 캡처 중 오류가 발생했습니다');
+            }
+        }
+
+        // html2canvas 라이브러리 동적 로드
+
+        // 메인 화면 캡처
+        async function captureMainScreen() {
+            // 메인 화면이 보이도록 설정
+            get('mainScreen').classList.remove('hidden');
+            get('loadingScreen').classList.add('hidden');
+            get('productScreen').classList.add('hidden');
+            
+            // 잠시 대기 (화면 전환 완료)
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // 시뮬레이터 영역만 캡처
+            const simulatorElement = document.querySelector('.phone-screen');
+            
+            const canvas = await html2canvas(simulatorElement, {
+                backgroundColor: '#ffffff',
+                scale: 2, // 고해상도
+                useCORS: true,
+                allowTaint: true
+            });
+            
+            // 파일명 생성
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+            const filename = `닥터지_BuzzAd_고민선택화면_${dateStr}.png`;
+            
+            // 다운로드
+            downloadCanvas(canvas, filename);
+        }
+
+        // 제품 상세 화면 캡처
+        async function captureProductScreen(productNum) {
+            // 제품 상세 화면 표시
+            showProductScreen(productNum);
+            
+            // 잠시 대기 (화면 전환 및 이미지 로드 완료)
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 시뮬레이터 영역만 캡처
+            const simulatorElement = document.querySelector('.phone-screen');
+            
+            const canvas = await html2canvas(simulatorElement, {
+                backgroundColor: '#ffffff',
+                scale: 2, // 고해상도
+                useCORS: true,
+                allowTaint: true,
+                foreignObjectRendering: true,
+                logging: false
+            });
+            
+            // 파일명 생성
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+            const productData = productDataStore[productNum];
+            const concernName = (productData.concern || '').replace(/\n/g, '').replace(/[^\w가-힣]/g, '').substring(0, 10);
+            const filename = `닥터지_BuzzAd_제품상세화면_${concernName}_${dateStr}.png`;
+            
+            // 다운로드
+            downloadCanvas(canvas, filename);
+            
+            // 메인 화면으로 되돌리기
+            setTimeout(() => {
+                goBack();
+            }, 500);
+        }
+
+        // 캔버스를 PNG 파일로 다운로드
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function downloadCSV() {
+            // 현재 편집 중인 데이터 저장
+            saveCurrentProductData();
+            
+            // CSV 헤더
+            const headers = [
+                '고민번호',
+                '피부고민',
+                '브랜드명',
+                '제품명',
+                '고객리뷰',
+                '별점정보',
+                '제품특징',
+                'CTA버튼텍스트',
+                '상품이미지URL'
+            ];
+            
+            // CSV 데이터 생성
+            const csvData = [];
+            csvData.push(headers.join(','));
+            
+            // 각 제품 데이터를 CSV 행으로 변환
+            for (let i = 1; i <= 4; i++) {
+                const data = productDataStore[i];
+                const row = [
+                    i,
+                    `"${(data.concern || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                    `"${(data.brandName || '').replace(/"/g, '""')}"`,
+                    `"${(data.productTitle || '').replace(/"/g, '""')}"`,
+                    `"${(data.productReview || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                    `"${(data.rating || '').replace(/"/g, '""')}"`,
+                    `"${(data.productHighlight || '').replace(/"/g, '""')}"`,
+                    `"${(data.ctaText || '').replace(/"/g, '""')}"`,
+                    `"${(data.imageUrl || '').replace(/"/g, '""')}"`
+                ];
+                csvData.push(row.join(','));
+            }
+            
+            // 현재 날짜 시간을 파일명에 포함
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+            const filename = `닥터지_BuzzAd_잘고른리뷰_광고데이터_${dateStr}.csv`;
+            
+            // CSV 파일 다운로드
+            const csvContent = '\uFEFF' + csvData.join('\n'); // UTF-8 BOM 추가 (한글 깨짐 방지)
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 성공 알림
+                showUpdateNotice('📊 CSV 파일이 다운로드되었습니다!');
+            } else {
+                alert('브라우저에서 파일 다운로드를 지원하지 않습니다.');
+            }
+        }
+
+        // 업데이트 알림 표시 (메시지 커스터마이징 가능)
+        function showUpdateNotice(message = '⚡ 실시간 업데이트됨') {
+            const notice = get('updateNotice');
+            notice.textContent = message;
+            notice.classList.add('show');
+            setTimeout(() => {
+                notice.classList.remove('show');
+            }, 3000);
+        }
+    
+</script>
+
+<script id="legacy-capture-adapter">
+function saveCurrentProductData(){
+    if(!window.productDataStore) window.productDataStore = {};
+    for(let i=1;i<=AppState.config.productCount;i++){
+        const p = AppState.products[i];
+        productDataStore[i] = {
+            concern: p.concern,
+            brandName: AppState.config.commonBrand,
+            productTitle: p.productTitle,
+            productReview: p.productReview,
+            rating: p.rating,
+            productHighlight: p.productHighlight,
+            ctaText: AppState.config.ctaText,
+            imageUrl: p.imageUrl
+        };
+    }
+    window.currentProduct = AppState.currentProduct || 1;
+}
+window.App = window.App || {};
+App.captureScreens = function(){ window.testButtonClick(); };
+</script>
+
+</body>
+</html>
